@@ -7,6 +7,7 @@ INFERNUS x MIDPEM Update Manager.
 
 import os
 import time
+import shlex
 import discord
 from update_api import deploy
 from update_api.transmit import transmit
@@ -14,7 +15,7 @@ from process import kill_sig, start_sig
 from discord.ext import commands
 
 
-TOKEN = "MTE1MTI2NDIyMzI4NDk1MzIwMA.G8YAWt.-rVBT6VvDpOIrCiKoa-H0fV2Ac8vTJC7ivsnvU"
+TOKEN = "<<< INSERT BOT TOKEN >>"
 # Discord bot interface token
 
 
@@ -157,6 +158,42 @@ async def _status_all(ctx, device_id=None) -> None:
     """
     
     await transmit(ctx, f"{COMPUTER_ID}: [i] ONLINE")
+
+
+@client.event
+async def on_message(message) -> None:
+    """
+    Directly handle messages to allow other bots and webhooks to interface with
+    MIDPEM and send their own commands.
+    
+    :param message: server message
+    :type message: Discord message object
+    """
+
+    if message.author == client.user:
+        return
+        # exit on current bot message read
+
+    if message.author.bot:
+    # allow webhook and bot commands to be processed
+    
+        command_text = shlex.split(message.content)
+        command = client.get_command(command_text[0].replace(CMD_PREFIX, ""))
+        ctx = await client.get_context(message)
+        # process input command and get context
+        
+        if len(command_text) == 1:
+            await command(ctx)
+            # process 0 argument command
+            
+        else:
+            await command(ctx, *command_text[1:])
+            # process 1+ argument command
+
+    else:
+        await client.process_commands(message)
+        # process user commands normally
+        # (this allows error detection and messaging to stay on)
 
 
 @client.event
