@@ -1,5 +1,5 @@
 """
-INFERNUS x MIDPEM Update Manager.
+MIDPEM Update Manager.
 
 :author: Max Milazzo
 """
